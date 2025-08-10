@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Penilaian & Penugasan - SMA Negeri 1 Capkala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .login-bg {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo-placeholder {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #6e6bff, #cd4e4e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: greenyellow;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen login-bg flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in">
+            <div class="text-center mb-8">
+                <div class="flex justify-center space-x-4 mb-4">
+                    <div class="logo-placeholder">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <div class="logo-placeholder">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">SMA Negeri 1 Capkala</h1>
+                <p class="text-gray-600">Sistem Penilaian & Penugasan</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Masukkan username">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Masukkan password">
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 font-medium">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Masuk
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="logo-placeholder">
+                            <i class="fas fa-school"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold">SMA Negeri 1 Capkala</h1>
+                            <p class="text-sm opacity-90">Sistem Penilaian & Penugasan</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="currentDateTime" class="text-sm opacity-90"></div>
+                        <button onclick="logout()" class="mt-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm transition duration-300">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-white shadow-md">
+            <div class="container mx-auto px-4">
+                <div class="flex space-x-8">
+                    <button onclick="showTab('input')" class="nav-btn py-4 px-6 border-b-2 border-transparent hover:border-blue-500 transition duration-300">
+                        <i class="fas fa-plus-circle mr-2"></i>Input Penilaian
+                    </button>
+                    <button onclick="showTab('recap')" class="nav-btn py-4 px-6 border-b-2 border-transparent hover:border-blue-500 transition duration-300">
+                        <i class="fas fa-chart-bar mr-2"></i>Rekap Data
+                    </button>
+                    <button onclick="showTab('subjects')" class="nav-btn py-4 px-6 border-b-2 border-transparent hover:border-blue-500 transition duration-300">
+                        <i class="fas fa-book mr-2"></i>Mata Pelajaran
+                    </button>
+                    <button onclick="showTab('teachers')" class="nav-btn py-4 px-6 border-b-2 border-transparent hover:border-blue-500 transition duration-300">
+                        <i class="fas fa-chalkboard-teacher mr-2"></i>Data Guru
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <main class="container mx-auto px-4 py-8">
+            <!-- Input Penilaian Tab -->
+            <div id="inputTab" class="tab-content">
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-edit mr-2 text-blue-600"></i>Input Penilaian & Penugasan
+                    </h2>
+                    
+                    <form id="assessmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Siswa</label>
+                            <input type="text" id="studentName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                            <select id="studentClass" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Pilih Kelas</option>
+                                <option value="X A">X A</option>
+                                <option value="X B">X B</option>
+                                <option value="X C">X C</option>
+                                <option value="XI A">XI A</option>
+                                <option value="XI B">XI B</option>
+                                <option value="XI C">XI C</option>
+                                <option value="XII A">XII A</option>
+                                <option value="XII B">XII B</option>
+                                <option value="XII C">XII C</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mata Pelajaran</label>
+                            <select id="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Pilih Mata Pelajaran</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Tugas</label>
+                            <select id="taskType" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Pilih Jenis Tugas</option>
+                                <option value="Mengumpulkan">Mengumpulkan</option>
+                                <option value="Tidak Mengumpulkan">Tidak Mengumpulkan</option>
+                                <option value="Tugas">Tugas</option>
+                                <option value="Latihan">Latihan</option>
+                                <option value="Kelompok">Kelompok</option>
+                                <option value="Mading">Mading</option>
+                                <option value="Video">Video</option>
+                                <option value="Presentasi">Presentasi</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nilai</label>
+                            <input type="number" id="score" min="0" max="100" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal</label>
+                            <input type="date" id="assessmentDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Guru</label>
+                            <select id="teacherName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Pilih Guru</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
+                            <textarea id="notes" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Keterangan tambahan (opsional)"></textarea>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 font-medium">
+                                <i class="fas fa-save mr-2"></i>Simpan Data
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Rekap Data Tab -->
+            <div id="recapTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">
+                            <i class="fas fa-chart-bar mr-2 text-green-600"></i>Rekap Data Penilaian
+                        </h2>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="refreshData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                                <i class="fas fa-sync-alt mr-1"></i>Refresh
+                            </button>
+                            <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                                <i class="fas fa-file-excel mr-1"></i>Export Excel
+                            </button>
+                            <button onclick="printData()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition duration-300">
+                                <i class="fas fa-print mr-1"></i>Print
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter Nama</label>
+                            <input type="text" id="filterName" placeholder="Cari nama siswa..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter Kelas</label>
+                            <select id="filterClass" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">Semua Kelas</option>
+                                <option value="X A">X A</option>
+                                <option value="X B">X B</option>
+                                <option value="X C">X C</option>
+                                <option value="XI A">XI A</option>
+                                <option value="XI B">XI B</option>
+                                <option value="XI C">XI C</option>
+                                <option value="XII A">XII A</option>
+                                <option value="XII B">XII B</option>
+                                <option value="XII C">XII C</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="applyFilter()" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300">
+                                <i class="fas fa-filter mr-1"></i>Filter
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full table-auto border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="border border-gray-300 px-4 py-3 text-left">No</th>
+                                    <th class="border border-gray-300 px-4 py-3 text-left">Nama Siswa</th>
+                                    <th class="border border-gray-300 px-4 py-3 text-left">Kelas</th>
+                                    <th class="border border-gray-300 px-4 py-3 text-left">Mata Pelajaran</th>
+                                    <th class="border border-gray-300 px-4 py-3 text-left">Jenis Tugas</th>
+                                    <th class="border border-gray-300 px-4 py-3 text-left">Nilai</th>
+                                    <th class="border border-gray-300 px-4 py-3 text-left">Tanggal</th>
+                                    <th class="border border-gray-300 px-4 py-3 text-left">Guru</th>
+                                    <th class="border border-gray-300 px-4 py-3 text-left">Keterangan</th>
+                                    <th class="border border-gray-300 px-4 py-3 text-left">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTableBody">
+                                <tr>
+                                    <td colspan="10" class="border border-gray-300 px-4 py-8 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i>Memuat data...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mata Pelajaran Tab -->
+            <div id="subjectsTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-book mr-2 text-purple-600"></i>Kelola Mata Pelajaran
+                        </h2>
+                        <button onclick="addSubject()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                            <i class="fas fa-plus mr-1"></i>Tambah
+                        </button>
+                    </div>
+                    
+                    <div id="subjectsList" class="space-y-2">
+                        <!-- Subject items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Guru Tab -->
+            <div id="teachersTab" class="tab-content hidden">
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-chalkboard-teacher mr-2 text-orange-600"></i>Kelola Data Guru
+                        </h2>
+                        <button onclick="addTeacher()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                            <i class="fas fa-plus mr-1"></i>Tambah
+                        </button>
+                    </div>
+                    
+                    <div id="teachersList" class="space-y-2">
+                        <!-- Teacher items will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="fixed top-4 right-4 z-50"></div>
+
+    <script>
+        // Global variables
+        let subjects = [
+            'Pendidikan Agama dan Budi Pekerti Islam',
+            'Pendidikan Agama dan Budi Pekerti Katholik',
+            'Pendidikan Agama dan Budi Pekerti Kristen',
+            'Pendidikan Agama dan Budi Pekerti Budha',
+            'Pendidikan Agama dan Budi Pekerti Hindu',
+            'Pendidikan Agama dan Budi Pekerti Konghucu',
+            'Pendidikan Pancasila',
+            'Bahasa Indonesia',
+            'Matematika Wajib',
+            'Bahasa Inggris',
+            'Sejarah',
+            'Sejarah Tingkat Lanjut',
+            'Matematika Tingkat Lanjut',
+            'Biologi',
+            'Kimia',
+            'Fisika',
+            'Ekonomi',
+            'Geografi',
+            'Sosiologi',
+            'Penjaskes',
+            'Seni Budaya',
+            'Prakarya',
+            'Informatika',
+            'Mulok Bahasa Potensi Daerah'
+        ];
+
+        let teachers = [
+            'Titus Hendri, S.Pd',
+            'Fransiskus Yoda D, S.Pd',
+            'Ardi Suherlly, S.Pd',
+            'Lukas Marianus, S.Ag',
+            'Bambang, S.Pd',
+            'Dian Wahyu Utami, S.Pd',
+            'Nurvivi, S.Pd',
+            'Sri Purnamasari, S.Pd',
+            'Yulita Yeremia, S.Pd',
+            'Lusi Sylvia, S.Pd',
+            'Reno Rajagukguk, S.Pd',
+            'Nuraisah, S.Pd',
+            'Eka, S.Pd',
+            'Edeltrudris Sunglan, S.Pd',
+            'Windanto Purdi Awan, S.Pd',
+            'Edwin Yazrullazi, S.Pd',
+            'Jaka Teguh S.Pd',
+            'Lidia, S.Pd',
+            'Bagie Rahmawati, S.Pd',
+            'Agustinus Sulistyanto, S.Pd'
+        ];
+
+        let assessmentData = [];
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/1wiWSPRX2gwInGKb9dzy2a2G3eLyzVDCXuSe0fEqOeVi6DIlf_-ayTaRr/exec';
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            populateDropdowns();
+            loadSubjects();
+            loadTeachers();
+            
+            // Set today's date as default
+            document.getElementById('assessmentDate').valueAsDate = new Date();
+            
+            // Login form handler
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            
+            // Assessment form handler
+            document.getElementById('assessmentForm').addEventListener('submit', handleSubmit);
+            
+            // Filter handlers
+            document.getElementById('filterName').addEventListener('input', applyFilter);
+            document.getElementById('filterClass').addEventListener('change', applyFilter);
+        });
+
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = {
+                timeZone: 'Asia/Jakarta',
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('id-ID', options) + ' WIB';
+        }
+
+        // Login handler
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'sman1capkala' && password === '123456') {
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                showMessage('Login berhasil! Selamat datang.', 'success');
+                loadData();
+            } else {
+                showMessage('Username atau password salah!', 'error');
+            }
+        }
+
+        // Logout
+        function logout() {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('loginForm').reset();
+            showMessage('Anda telah keluar dari sistem.', 'info');
+        }
+
+        // Tab navigation
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('border-blue-500', 'text-blue-600');
+            
+            // Load data for recap tab
+            if (tabName === 'recap') {
+                loadData();
+            }
+        }
+
+        // Populate dropdowns
+        function populateDropdowns() {
+            const subjectSelect = document.getElementById('subject');
+            const teacherSelect = document.getElementById('teacherName');
+            
+            // Clear existing options
+            subjectSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
+            teacherSelect.innerHTML = '<option value="">Pilih Guru</option>';
+            
+            // Populate subjects
+            subjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                subjectSelect.appendChild(option);
+            });
+            
+            // Populate teachers
+            teachers.forEach(teacher => {
+                const option = document.createElement('option');
+                option.value = teacher;
+                option.textContent = teacher;
+                teacherSelect.appendChild(option);
+            });
+        }
+
+        // Handle form submission
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const formData = {
+                studentName: document.getElementById('studentName').value,
+                studentClass: document.getElementById('studentClass').value,
+                subject: document.getElementById('subject').value,
+                taskType: document.getElementById('taskType').value,
+                score: document.getElementById('score').value,
+                date: document.getElementById('assessmentDate').value,
+                teacher: document.getElementById('teacherName').value,
+                notes: document.getElementById('notes').value
+            };
+            
+            try {
+                // Add to local data
+                assessmentData.push({
+                    id: Date.now(),
+                    ...formData,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Here you would send to Google Sheets
+                // await sendToGoogleSheets(formData);
+                
+                showMessage('Data berhasil disimpan!', 'success');
+                document.getElementById('assessmentForm').reset();
+                document.getElementById('assessmentDate').valueAsDate = new Date();
+                
+                // Refresh data if on recap tab
+                if (!document.getElementById('recapTab').classList.contains('hidden')) {
+                    displayData();
+                }
+                
+            } catch (error) {
+                showMessage('Gagal menyimpan data: ' + error.message, 'error');
+            }
+        }
+
+        // Load data (simulate from Google Sheets)
+        function loadData() {
+            // Simulate loading data
+            setTimeout(() => {
+                displayData();
+            }, 1000);
+        }
+
+        // Display data in table
+        function displayData(filteredData = null) {
+            const tbody = document.getElementById('dataTableBody');
+            const dataToShow = filteredData || assessmentData;
+            
+            if (dataToShow.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="border border-gray-300 px-4 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox mr-2"></i>Tidak ada data
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = dataToShow.map((item, index) => `
+                <tr class="hover:bg-gray-50">
+                    <td class="border border-gray-300 px-4 py-2">${index + 1}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.studentName}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.studentClass}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.subject}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.taskType}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.score}</td>
+                    <td class="border border-gray-300 px-4 py-2">${new Date(item.date).toLocaleDateString('id-ID')}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.teacher}</td>
+                    <td class="border border-gray-300 px-4 py-2">${item.notes || '-'}</td>
+                    <td class="border border-gray-300 px-4 py-2">
+                        <div class="flex space-x-1">
+                            <button onclick="editData(${item.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteData(${item.id})" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Apply filters
+        function applyFilter() {
+            const nameFilter = document.getElementById('filterName').value.toLowerCase();
+            const classFilter = document.getElementById('filterClass').value;
+            
+            const filteredData = assessmentData.filter(item => {
+                const nameMatch = item.studentName.toLowerCase().includes(nameFilter);
+                const classMatch = !classFilter || item.studentClass === classFilter;
+                return nameMatch && classMatch;
+            });
+            
+            displayData(filteredData);
+        }
+
+        // Refresh data
+        function refreshData() {
+            showMessage('Memperbarui data...', 'info');
+            loadData();
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            // Create CSV content
+            const headers = ['No', 'Nama Siswa', 'Kelas', 'Mata Pelajaran', 'Jenis Tugas', 'Nilai', 'Tanggal', 'Guru', 'Keterangan'];
+            const csvContent = [
+                headers.join(','),
+                ...assessmentData.map((item, index) => [
+                    index + 1,
+                    `"${item.studentName}"`,
+                    `"${item.studentClass}"`,
+                    `"${item.subject}"`,
+                    `"${item.taskType}"`,
+                    item.score,
+                    new Date(item.date).toLocaleDateString('id-ID'),
+                    `"${item.teacher}"`,
+                    `"${item.notes || ''}"`
+                ].join(','))
+            ].join('\n');
+            
+            // Download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Data_Penilaian_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            showMessage('Data berhasil diekspor!', 'success');
+        }
+
+        // Print data
+        function printData() {
+            const printWindow = window.open('', '_blank');
+            const printContent = `
+                <html>
+                <head>
+                    <title>Data Penilaian - SMA Negeri 1 Capkala</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1 { text-align: center; color: #333; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>SMA Negeri 1 Capkala</h1>
+                        <h2>Data Penilaian & Penugasan</h2>
+                        <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID')}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Siswa</th>
+                                <th>Kelas</th>
+                                <th>Mata Pelajaran</th>
+                                <th>Jenis Tugas</th>
+                                <th>Nilai</th>
+                                <th>Tanggal</th>
+                                <th>Guru</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${assessmentData.map((item, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${item.studentName}</td>
+                                    <td>${item.studentClass}</td>
+                                    <td>${item.subject}</td>
+                                    <td>${item.taskType}</td>
+                                    <td>${item.score}</td>
+                                    <td>${new Date(item.date).toLocaleDateString('id-ID')}</td>
+                                    <td>${item.teacher}</td>
+                                    <td>${item.notes || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+            
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Edit data
+        function editData(id) {
+            const item = assessmentData.find(data => data.id === id);
+            if (item) {
+                // Fill form with existing data
+                document.getElementById('studentName').value = item.studentName;
+                document.getElementById('studentClass').value = item.studentClass;
+                document.getElementById('subject').value = item.subject;
+                document.getElementById('taskType').value = item.taskType;
+                document.getElementById('score').value = item.score;
+                document.getElementById('assessmentDate').value = item.date;
+                document.getElementById('teacherName').value = item.teacher;
+                document.getElementById('notes').value = item.notes || '';
+                
+                // Remove the item from array (will be re-added when form is submitted)
+                assessmentData = assessmentData.filter(data => data.id !== id);
+                
+                // Switch to input tab
+                showTab('input');
+                showMessage('Data dimuat untuk diedit', 'info');
+            }
+        }
+
+        // Delete data
+        function deleteData(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                assessmentData = assessmentData.filter(data => data.id !== id);
+                displayData();
+                showMessage('Data berhasil dihapus!', 'success');
+            }
+        }
+
+        // Load subjects
+        function loadSubjects() {
+            const container = document.getElementById('subjectsList');
+            container.innerHTML = subjects.map((subject, index) => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span class="font-medium">${subject}</span>
+                    <button onclick="removeSubject(${index})" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Add subject
+        function addSubject() {
+            const subject = prompt('Masukkan nama mata pelajaran baru:');
+            if (subject && subject.trim()) {
+                subjects.push(subject.trim());
+                loadSubjects();
+                populateDropdowns();
+                showMessage('Mata pelajaran berhasil ditambahkan!', 'success');
+            }
+        }
+
+        // Remove subject
+        function removeSubject(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?')) {
+                subjects.splice(index, 1);
+                loadSubjects();
+                populateDropdowns();
+                showMessage('Mata pelajaran berhasil dihapus!', 'success');
+            }
+        }
+
+        // Load teachers
+        function loadTeachers() {
+            const container = document.getElementById('teachersList');
+            container.innerHTML = teachers.map((teacher, index) => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span class="font-medium">${teacher}</span>
+                    <button onclick="removeTeacher(${index})" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Add teacher
+        function addTeacher() {
+            const teacher = prompt('Masukkan nama guru baru:');
+            if (teacher && teacher.trim()) {
+                teachers.push(teacher.trim());
+                loadTeachers();
+                populateDropdowns();
+                showMessage('Data guru berhasil ditambahkan!', 'success');
+            }
+        }
+
+        // Remove teacher
+        function removeTeacher(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus data guru ini?')) {
+                teachers.splice(index, 1);
+                loadTeachers();
+                populateDropdowns();
+                showMessage('Data guru berhasil dihapus!', 'success');
+            }
+        }
+
+        // Show message
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            
+            const bgColor = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500',
+                warning: 'bg-yellow-500'
+            }[type] || 'bg-gray-500';
+            
+            const icon = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                info: 'fas fa-info-circle',
+                warning: 'fas fa-exclamation-triangle'
+            }[type] || 'fas fa-info-circle';
+            
+            messageDiv.className = `${bgColor} text-white px-6 py-3 rounded-lg shadow-lg mb-2 animate-fade-in`;
+            messageDiv.innerHTML = `
+                <div class="flex items-center">
+                    <i class="${icon} mr-2"></i>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(messageDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize first tab
+        setTimeout(() => {
+            showTab('input');
+        }, 100);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ce19ea6640602f',t:'MTc1NDgxNDMxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
