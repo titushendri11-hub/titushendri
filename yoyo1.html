@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Penilaian & Penugasan - SMA Negeri 1 Capkala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-primary:hover { background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%); }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .login-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Login Page -->
+    <div id="loginPage" class="login-bg flex items-center justify-center">
+        <div class="glass-effect rounded-2xl p-8 w-full max-w-md mx-4 animate-fade-in">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 mx-auto mb-4 bg-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-school text-3xl text-indigo-600"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white mb-2">SMA Negeri 1 Capkala</h1>
+                <p class="text-indigo-100">Sistem Penilaian & Penugasan</p>
+            </div>
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-white text-sm font-medium mb-2">Username</label>
+                    <input type="text" id="username" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50" placeholder="Masukkan username" required>
+                </div>
+                <div>
+                    <label class="block text-white text-sm font-medium mb-2">Password</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50" placeholder="Masukkan password" required>
+                </div>
+                <button type="submit" class="w-full bg-white text-indigo-600 py-3 rounded-lg font-semibold hover:bg-indigo-50 transition duration-300">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Masuk
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                            <i class="fas fa-school text-2xl text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold">SMA Negeri 1 Capkala</h1>
+                            <p class="text-indigo-100 text-sm">Sistem Penilaian & Penugasan</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="currentDateTime" class="text-sm font-medium"></div>
+                        <button onclick="logout()" class="text-indigo-100 hover:text-white text-sm mt-1">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b">
+            <div class="container mx-auto px-4">
+                <div class="flex space-x-8">
+                    <button onclick="showTab('dashboard')" class="tab-btn py-4 px-2 border-b-2 border-indigo-500 text-indigo-600 font-medium">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </button>
+                    <button onclick="showTab('assignment')" class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-tasks mr-2"></i>Input Penugasan
+                    </button>
+                    <button onclick="showTab('recap')" class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-chart-bar mr-2"></i>Rekap Data
+                    </button>
+                    <button onclick="showTab('subjects')" class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-book mr-2"></i>Mata Pelajaran
+                    </button>
+                    <button onclick="showTab('teachers')" class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-chalkboard-teacher mr-2"></i>Data Guru
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-gray-500 text-sm">Total Siswa</p>
+                            <p class="text-2xl font-bold text-gray-800" id="totalStudents">270</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <i class="fas fa-tasks text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-gray-500 text-sm">Total Tugas</p>
+                            <p class="text-2xl font-bold text-gray-800" id="totalAssignments">45</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                            <i class="fas fa-book text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-gray-500 text-sm">Mata Pelajaran</p>
+                            <p class="text-2xl font-bold text-gray-800" id="totalSubjects">24</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                            <i class="fas fa-chalkboard-teacher text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-gray-500 text-sm">Total Guru</p>
+                            <p class="text-2xl font-bold text-gray-800" id="totalTeachers">20</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl card-shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Aktivitas Terbaru</h3>
+                <div class="space-y-4" id="recentActivity">
+                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">Tugas Matematika - Kelas XI A</p>
+                            <p class="text-xs text-gray-500">2 menit yang lalu</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment Tab -->
+        <div id="assignment" class="tab-content hidden container mx-auto px-4 py-8">
+            <div class="bg-white rounded-xl card-shadow p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Input Data Penugasan</h2>
+                <form id="assignmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Siswa</label>
+                        <input type="text" id="studentName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                        <select id="studentClass" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                            <option value="">Pilih Kelas</option>
+                            <option value="X A">X A</option>
+                            <option value="X B">X B</option>
+                            <option value="X C">X C</option>
+                            <option value="XI A">XI A</option>
+                            <option value="XI B">XI B</option>
+                            <option value="XI C">XI C</option>
+                            <option value="XII A">XII A</option>
+                            <option value="XII B">XII B</option>
+                            <option value="XII C">XII C</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Mata Pelajaran</label>
+                        <select id="subject" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                            <option value="">Pilih Mata Pelajaran</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Penugasan</label>
+                        <select id="assignmentType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                            <option value="">Pilih Jenis Penugasan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nilai</label>
+                        <input type="number" id="score" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal</label>
+                        <input type="date" id="assignmentDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Guru</label>
+                        <select id="teacherName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
+                            <option value="">Pilih Guru</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
+                        <textarea id="description" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" rows="3"></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" class="btn-primary text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition duration-300">
+                            <i class="fas fa-save mr-2"></i>Simpan Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Recap Tab -->
+        <div id="recap" class="tab-content hidden container mx-auto px-4 py-8">
+            <div class="bg-white rounded-xl card-shadow p-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Rekap Data Penugasan</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportToExcel()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                            <i class="fas fa-file-excel mr-2"></i>Export Excel
+                        </button>
+                        <button onclick="printData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                            <i class="fas fa-print mr-2"></i>Print
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter Nama</label>
+                        <input type="text" id="filterName" placeholder="Cari nama siswa..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter Kelas</label>
+                        <select id="filterClass" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="">Semua Kelas</option>
+                            <option value="X A">X A</option>
+                            <option value="X B">X B</option>
+                            <option value="X C">X C</option>
+                            <option value="XI A">XI A</option>
+                            <option value="XI B">XI B</option>
+                            <option value="XI C">XI C</option>
+                            <option value="XII A">XII A</option>
+                            <option value="XII B">XII B</option>
+                            <option value="XII C">XII C</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="applyFilter()" class="w-full btn-primary text-white px-4 py-2 rounded-lg font-semibold">
+                            <i class="fas fa-search mr-2"></i>Filter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full table-auto">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mata Pelajaran</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Tugas</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guru</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recapTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects Tab -->
+        <div id="subjects" class="tab-content hidden container mx-auto px-4 py-8">
+            <div class="bg-white rounded-xl card-shadow p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Mata Pelajaran</h2>
+                    <button onclick="showAddSubjectModal()" class="btn-primary text-white px-4 py-2 rounded-lg font-semibold">
+                        <i class="fas fa-plus mr-2"></i>Tambah Mata Pelajaran
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="subjectsList">
+                    <!-- Subjects will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Teachers Tab -->
+        <div id="teachers" class="tab-content hidden container mx-auto px-4 py-8">
+            <div class="bg-white rounded-xl card-shadow p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Data Guru</h2>
+                    <button onclick="showAddTeacherModal()" class="btn-primary text-white px-4 py-2 rounded-lg font-semibold">
+                        <i class="fas fa-plus mr-2"></i>Tambah Guru
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="teachersList">
+                    <!-- Teachers will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="addSubjectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold mb-4">Tambah Mata Pelajaran</h3>
+            <input type="text" id="newSubjectName" placeholder="Nama mata pelajaran" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4">
+            <div class="flex justify-end space-x-2">
+                <button onclick="hideAddSubjectModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Batal</button>
+                <button onclick="addSubject()" class="btn-primary text-white px-4 py-2 rounded-lg">Tambah</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addTeacherModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold mb-4">Tambah Guru</h3>
+            <input type="text" id="newTeacherName" placeholder="Nama guru" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4">
+            <div class="flex justify-end space-x-2">
+                <button onclick="hideAddTeacherModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Batal</button>
+                <button onclick="addTeacher()" class="btn-primary text-white px-4 py-2 rounded-lg">Tambah</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let subjects = [
+            'Pendidikan Agama dan Budi Pekerti Islam',
+            'Pendidikan Agama dan Budi Pekerti Katholik',
+            'Pendidikan Agama dan Budi Pekerti Kristen',
+            'Pendidikan Agama dan Budi Pekerti Budha',
+            'Pendidikan Agama dan Budi Pekerti Hindu',
+            'Pendidikan Agama dan Budi Pekerti Konghucu',
+            'Pendikan Pancasila',
+            'Bahasa Indonesia',
+            'Matematika Wajib',
+            'Bahasa Inggris',
+            'Sejarah',
+            'Sejarah Tingkat Lanjut',
+            'Matematika Tingkat Lanjut',
+            'Biologi',
+            'Kimia',
+            'Fisika',
+            'Ekonomi',
+            'Geografi',
+            'Sosiologi',
+            'Penjaskes',
+            'Seni Budaya',
+            'Prakarya',
+            'Informatika',
+            'Mulok Bahasa Potensi Daerah'
+        ];
+
+        let teachers = [
+            'Titus Hendri, S.Pd',
+            'Fransiskus Yoda D, S.Pd',
+            'Ardi Suherlly, S.Pd',
+            'Luaks Marianus, S.Ag',
+            'Bambang, S.Pd',
+            'Dian Wahyu Utami, S.Pd',
+            'Nurvivi, S.Pd',
+            'Sri Purnamsari, S.Pd',
+            'Yulita Yeremia, S.Pd',
+            'Lusi Sylvia, S.Pd',
+            'Reno Rajagukguk, S.Pd',
+            'Nuraisah, S.Pd',
+            'Eka, S.Pd',
+            'Edeltrudris Sunglan, S.Pd',
+            'Windanto Purdi Awan, S.Pd',
+            'Edwin Yazrullazi, S.Pd',
+            'Jaka Teguh S.Pd',
+            'Lidia, S.Pd',
+            'Bagie Rahmawati, S.Pd',
+            'Agustinus Sulistyanto, S.Pd'
+        ];
+
+        let assignmentTypes = [
+            'Mengumpulkan',
+            'Tidak Mengumpulkan',
+            'Tugas',
+            'Latihan',
+            'Kelompok',
+            'Mading',
+            'Video',
+            'Presentasi'
+        ];
+
+        let assignmentData = [
+            {
+                id: 1,
+                studentName: 'Ahmad Rizki',
+                studentClass: 'XI A',
+                subject: 'Matematika Wajib',
+                assignmentType: 'Tugas',
+                score: 85,
+                date: '2024-01-15',
+                teacher: 'Sri Purnamsari, S.Pd',
+                description: 'Tugas integral'
+            },
+            {
+                id: 2,
+                studentName: 'Siti Nurhaliza',
+                studentClass: 'XI A',
+                subject: 'Bahasa Indonesia',
+                assignmentType: 'Presentasi',
+                score: 90,
+                date: '2024-01-14',
+                teacher: 'Dian Wahyu Utami, S.Pd',
+                description: 'Presentasi puisi'
+            },
+            {
+                id: 3,
+                studentName: 'Budi Santoso',
+                studentClass: 'X B',
+                subject: 'Fisika',
+                assignmentType: 'Latihan',
+                score: 78,
+                date: '2024-01-13',
+                teacher: 'Windanto Purdi Awan, S.Pd',
+                description: 'Latihan gerak lurus'
+            }
+        ];
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'sman1capkala' && password === '123456') {
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                initializeApp();
+            } else {
+                alert('Username atau password salah!');
+            }
+        });
+
+        function logout() {
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Initialize app
+        function initializeApp() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            loadSubjects();
+            loadTeachers();
+            loadAssignmentTypes();
+            loadRecapData();
+            setTodayDate();
+        }
+
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = {
+                timeZone: 'Asia/Jakarta',
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('id-ID', options) + ' WIB';
+        }
+
+        // Set today's date
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('assignmentDate').value = today;
+        }
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'text-indigo-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            event.target.classList.add('border-indigo-500', 'text-indigo-600');
+        }
+
+        // Load subjects
+        function loadSubjects() {
+            const subjectSelect = document.getElementById('subject');
+            const subjectsList = document.getElementById('subjectsList');
+            
+            subjectSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
+            subjectsList.innerHTML = '';
+            
+            subjects.forEach((subject, index) => {
+                // Add to select
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                subjectSelect.appendChild(option);
+                
+                // Add to list
+                const subjectCard = document.createElement('div');
+                subjectCard.className = 'bg-gray-50 p-4 rounded-lg flex justify-between items-center';
+                subjectCard.innerHTML = `
+                    <span class="font-medium">${subject}</span>
+                    <button onclick="removeSubject(${index})" class="text-red-600 hover:text-red-800">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                subjectsList.appendChild(subjectCard);
+            });
+        }
+
+        // Load teachers
+        function loadTeachers() {
+            const teacherSelect = document.getElementById('teacherName');
+            const teachersList = document.getElementById('teachersList');
+            
+            teacherSelect.innerHTML = '<option value="">Pilih Guru</option>';
+            teachersList.innerHTML = '';
+            
+            teachers.forEach((teacher, index) => {
+                // Add to select
+                const option = document.createElement('option');
+                option.value = teacher;
+                option.textContent = teacher;
+                teacherSelect.appendChild(option);
+                
+                // Add to list
+                const teacherCard = document.createElement('div');
+                teacherCard.className = 'bg-gray-50 p-4 rounded-lg flex justify-between items-center';
+                teacherCard.innerHTML = `
+                    <span class="font-medium">${teacher}</span>
+                    <button onclick="removeTeacher(${index})" class="text-red-600 hover:text-red-800">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                teachersList.appendChild(teacherCard);
+            });
+        }
+
+        // Load assignment types
+        function loadAssignmentTypes() {
+            const assignmentTypeSelect = document.getElementById('assignmentType');
+            assignmentTypeSelect.innerHTML = '<option value="">Pilih Jenis Penugasan</option>';
+            
+            assignmentTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                assignmentTypeSelect.appendChild(option);
+            });
+        }
+
+        // Assignment form submission
+        document.getElementById('assignmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                id: Date.now(),
+                studentName: document.getElementById('studentName').value,
+                studentClass: document.getElementById('studentClass').value,
+                subject: document.getElementById('subject').value,
+                assignmentType: document.getElementById('assignmentType').value,
+                score: parseInt(document.getElementById('score').value),
+                date: document.getElementById('assignmentDate').value,
+                teacher: document.getElementById('teacherName').value,
+                description: document.getElementById('description').value
+            };
+            
+            assignmentData.push(formData);
+            
+            // Send to Google Sheets (simulated)
+            sendToGoogleSheets(formData);
+            
+            // Reset form
+            this.reset();
+            setTodayDate();
+            
+            // Show success message
+            alert('Data berhasil disimpan!');
+            
+            // Reload recap data
+            loadRecapData();
+        });
+
+        // Simulated Google Sheets integration
+        function sendToGoogleSheets(data) {
+            // In real implementation, this would send data to Google Apps Script
+            console.log('Sending to Google Sheets:', data);
+            
+            // Simulate API call
+            // fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(data)
+            // });
+        }
+
+        // Load recap data
+        function loadRecapData() {
+            const tbody = document.getElementById('recapTableBody');
+            tbody.innerHTML = '';
+            
+            assignmentData.forEach((data, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.studentName}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.studentClass}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.subject}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.assignmentType}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.score}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(data.date).toLocaleDateString('id-ID')}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.teacher}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button onclick="editAssignment(${data.id})" class="text-indigo-600 hover:text-indigo-900 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteAssignment(${data.id})" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Filter functionality
+        function applyFilter() {
+            const nameFilter = document.getElementById('filterName').value.toLowerCase();
+            const classFilter = document.getElementById('filterClass').value;
+            
+            const filteredData = assignmentData.filter(data => {
+                const nameMatch = data.studentName.toLowerCase().includes(nameFilter);
+                const classMatch = !classFilter || data.studentClass === classFilter;
+                return nameMatch && classMatch;
+            });
+            
+            const tbody = document.getElementById('recapTableBody');
+            tbody.innerHTML = '';
+            
+            filteredData.forEach((data, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.studentName}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.studentClass}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.subject}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.assignmentType}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.score}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(data.date).toLocaleDateString('id-ID')}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${data.teacher}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button onclick="editAssignment(${data.id})" class="text-indigo-600 hover:text-indigo-900 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteAssignment(${data.id})" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(assignmentData.map(data => ({
+                'Nama Siswa': data.studentName,
+                'Kelas': data.studentClass,
+                'Mata Pelajaran': data.subject,
+                'Jenis Tugas': data.assignmentType,
+                'Nilai': data.score,
+                'Tanggal': data.date,
+                'Guru': data.teacher,
+                'Keterangan': data.description
+            })));
+            
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Data Penugasan');
+            XLSX.writeFile(wb, 'Data_Penugasan_SMA_Negeri_1_Capkala.xlsx');
+        }
+
+        // Print functionality
+        function printData() {
+            const printWindow = window.open('', '_blank');
+            const printContent = `
+                <html>
+                <head>
+                    <title>Data Penugasan - SMA Negeri 1 Capkala</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1 { text-align: center; color: #333; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>SMA Negeri 1 Capkala</h1>
+                        <h2>Data Penugasan Siswa</h2>
+                        <p>Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Siswa</th>
+                                <th>Kelas</th>
+                                <th>Mata Pelajaran</th>
+                                <th>Jenis Tugas</th>
+                                <th>Nilai</th>
+                                <th>Tanggal</th>
+                                <th>Guru</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${assignmentData.map((data, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${data.studentName}</td>
+                                    <td>${data.studentClass}</td>
+                                    <td>${data.subject}</td>
+                                    <td>${data.assignmentType}</td>
+                                    <td>${data.score}</td>
+                                    <td>${new Date(data.date).toLocaleDateString('id-ID')}</td>
+                                    <td>${data.teacher}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+            
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Modal functions
+        function showAddSubjectModal() {
+            document.getElementById('addSubjectModal').classList.remove('hidden');
+        }
+
+        function hideAddSubjectModal() {
+            document.getElementById('addSubjectModal').classList.add('hidden');
+            document.getElementById('newSubjectName').value = '';
+        }
+
+        function showAddTeacherModal() {
+            document.getElementById('addTeacherModal').classList.remove('hidden');
+        }
+
+        function hideAddTeacherModal() {
+            document.getElementById('addTeacherModal').classList.add('hidden');
+            document.getElementById('newTeacherName').value = '';
+        }
+
+        // Add/Remove functions
+        function addSubject() {
+            const newSubject = document.getElementById('newSubjectName').value.trim();
+            if (newSubject && !subjects.includes(newSubject)) {
+                subjects.push(newSubject);
+                loadSubjects();
+                hideAddSubjectModal();
+            }
+        }
+
+        function removeSubject(index) {
+            if (confirm('Yakin ingin menghapus mata pelajaran ini?')) {
+                subjects.splice(index, 1);
+                loadSubjects();
+            }
+        }
+
+        function addTeacher() {
+            const newTeacher = document.getElementById('newTeacherName').value.trim();
+            if (newTeacher && !teachers.includes(newTeacher)) {
+                teachers.push(newTeacher);
+                loadTeachers();
+                hideAddTeacherModal();
+            }
+        }
+
+        function removeTeacher(index) {
+            if (confirm('Yakin ingin menghapus guru ini?')) {
+                teachers.splice(index, 1);
+                loadTeachers();
+            }
+        }
+
+        // Assignment CRUD
+        function editAssignment(id) {
+            const assignment = assignmentData.find(data => data.id === id);
+            if (assignment) {
+                document.getElementById('studentName').value = assignment.studentName;
+                document.getElementById('studentClass').value = assignment.studentClass;
+                document.getElementById('subject').value = assignment.subject;
+                document.getElementById('assignmentType').value = assignment.assignmentType;
+                document.getElementById('score').value = assignment.score;
+                document.getElementById('assignmentDate').value = assignment.date;
+                document.getElementById('teacherName').value = assignment.teacher;
+                document.getElementById('description').value = assignment.description;
+                
+                // Switch to assignment tab
+                showTab('assignment');
+                
+                // Remove the old entry
+                deleteAssignment(id, false);
+            }
+        }
+
+        function deleteAssignment(id, confirm = true) {
+            if (!confirm || window.confirm('Yakin ingin menghapus data ini?')) {
+                assignmentData = assignmentData.filter(data => data.id !== id);
+                loadRecapData();
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set focus on username field
+            document.getElementById('username').focus();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96cde1d24145fdec',t:'MTc1NDgxMjAxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
